@@ -40,162 +40,162 @@ Resources:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
 
-  # PublicSubnet:
-  #   Type: AWS::EC2::Subnet
-  #   Properties:
-  #     VpcId: !Ref VPC
-  #     CidrBlock: !Ref PublicSubnetCidr
-  #     AvailabilityZone: !Select [0, !GetAZs ""]
-  #     MapPublicIpOnLaunch: true
-  #     Tags:
-  #       - Key: Name
-  #         Value: PublicSubnet
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetCidr
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: PublicSubnet
 
-  # PrivateSubnet:
-  #   Type: AWS::EC2::Subnet
-  #   Properties:
-  #     VpcId: !Ref VPC
-  #     CidrBlock: !Ref PrivateSubnetCidr
-  #     AvailabilityZone: !Select [1, !GetAZs ""]
-  #     Tags:
-  #       - Key: Name
-  #         Value: PrivateSubnet
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetCidr
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet
 
-  # PublicRouteTable:
-  #   Type: AWS::EC2::RouteTable
-  #   Properties:
-  #     VpcId: !Ref VPC
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
 
-  # PublicRoute:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachInternetGateway
-  #   Properties:
-  #     RouteTableId: !Ref PublicRouteTable
-  #     DestinationCidrBlock: 0.0.0.0/0
-  #     GatewayId: !Ref InternetGateway
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachInternetGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
 
-  # PublicSubnetRouteTableAssociation:
-  #   Type: AWS::EC2::SubnetRouteTableAssociation
-  #   Properties:
-  #     SubnetId: !Ref PublicSubnet
-  #     RouteTableId: !Ref PublicRouteTable
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
 
-  # NatEIP:
-  #   Type: AWS::EC2::EIP
-  #   Properties:
-  #     Domain: vpc
+  NatEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
 
-  # NatGateway:
-  #   Type: AWS::EC2::NatGateway
-  #   Properties:
-  #     AllocationId: !GetAtt NatEIP.AllocationId
-  #     SubnetId: !Ref PublicSubnet
-  #     Tags:
-  #       - Key: Name
-  #         Value: NatGateway
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref PublicSubnet
+      Tags:
+        - Key: Name
+          Value: NatGateway
 
-  # PrivateRouteTable:
-  #   Type: AWS::EC2::RouteTable
-  #   Properties:
-  #     VpcId: !Ref VPC
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
 
-  # PrivateRoute:
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     RouteTableId: !Ref PrivateRouteTable
-  #     DestinationCidrBlock: 0.0.0.0/0
-  #     NatGatewayId: !Ref NatGateway
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
 
-  # PrivateSubnetRouteTableAssociation:
-  #   Type: AWS::EC2::SubnetRouteTableAssociation
-  #   Properties:
-  #     SubnetId: !Ref PrivateSubnet
-  #     RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRouteTable
 
-  # ##### split the security groups to allow for pinging#####
-  # PublicInstanceSecurityGroup:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupDescription: Security group for public EC2
-  #     VpcId: !Ref VPC
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         FromPort: 80
-  #         ToPort: 80
-  #         CidrIp: 0.0.0.0/0
-  #       - IpProtocol: icmp
-  #         FromPort: -1
-  #         ToPort: -1
-  #         SourceSecurityGroupId: !Ref PrivateInstanceSecurityGroup
+  ##### split the security groups to allow for pinging#####
+  PublicInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for public EC2
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          SourceSecurityGroupId: !Ref PrivateInstanceSecurityGroup
 
-  # PrivateInstanceSecurityGroup:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupDescription: Security group for private EC2
-  #     VpcId: !Ref VPC
-  #     SecurityGroupIngress:
-  #       - IpProtocol: icmp
-  #         FromPort: -1
-  #         ToPort: -1
-  #         SourceSecurityGroupId: !Ref PublicInstanceSecurityGroup
+  PrivateInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for private EC2
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          SourceSecurityGroupId: !Ref PublicInstanceSecurityGroup
 
-  # SSMRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     AssumeRolePolicyDocument:
-  #       Version: "2012-10-17"
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             Service: ec2.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     ManagedPolicyArns:
-  #       - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+  SSMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
 
-  # SSMInstanceProfile:
-  #   Type: AWS::IAM::InstanceProfile
-  #   Properties:
-  #     Roles:
-  #       - !Ref SSMRole
+  SSMInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref SSMRole
 
-  # WebServerInstance:
-  #   Type: AWS::EC2::Instance
-  #   Properties:
-  #     InstanceType: t3.micro
-  #     SubnetId: !Ref PublicSubnet
-  #     ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}"
-  #     SecurityGroupIds:
-  #       - !Ref PublicInstanceSecurityGroup
-  #     IamInstanceProfile: !Ref SSMInstanceProfile
-  #     UserData:
-  #       Fn::Base64: !Sub |
-  #         #!/bin/bash
-  #         yum update -y
-  #         yum install -y httpd
-  #         systemctl enable httpd
-  #         systemctl start httpd
-  #         echo "<html><body><h1>Hello from Akwasi Kusi-Appiah</h1></body></html>" > /var/www/html/index.html
-  #     Tags:
-  #       - Key: Name
-  #         Value: ApacheWebServer
+  WebServerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      SubnetId: !Ref PublicSubnet
+      ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}"
+      SecurityGroupIds:
+        - !Ref PublicInstanceSecurityGroup
+      IamInstanceProfile: !Ref SSMInstanceProfile
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl enable httpd
+          systemctl start httpd
+          echo "<html><body><h1>Hello from Akwasi Kusi-Appiah</h1></body></html>" > /var/www/html/index.html
+      Tags:
+        - Key: Name
+          Value: ApacheWebServer
 
-  # PrivateInstance:
-  #   Type: AWS::EC2::Instance
-  #   Properties:
-  #     InstanceType: t3.micro
-  #     SubnetId: !Ref PrivateSubnet
-  #     ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}"
-  #     SecurityGroupIds:
-  #       - !Ref PrivateInstanceSecurityGroup
-  #     IamInstanceProfile: !Ref SSMInstanceProfile
-  #     Tags:
-  #       - Key: Name
-  #         Value: PrivateInstance
-# Outputs:
-#   WebServerPublicIP:
-#     Description: Public IP of the Apache Web Server
-#     Value: !GetAtt WebServerInstance.PublicIp
+  PrivateInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      SubnetId: !Ref PrivateSubnet
+      ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}"
+      SecurityGroupIds:
+        - !Ref PrivateInstanceSecurityGroup
+      IamInstanceProfile: !Ref SSMInstanceProfile
+      Tags:
+        - Key: Name
+          Value: PrivateInstance
+Outputs:
+  WebServerPublicIP:
+    Description: Public IP of the Apache Web Server
+    Value: !GetAtt WebServerInstance.PublicIp
 
-#   PrivateInstanceID:
-#     Description: EC2 Instance ID of the Private Server
-#     Value: !Ref PrivateInstance
+  PrivateInstanceID:
+    Description: EC2 Instance ID of the Private Server
+    Value: !Ref PrivateInstance
