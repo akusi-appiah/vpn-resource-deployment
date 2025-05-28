@@ -126,6 +126,10 @@ Resources:
           FromPort: -1
           ToPort: -1
           CidrIp: !Ref PrivateSubnetCidr
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: !Sub "${NatEIP}/32"  # Allows ping to public IP
       Tags:
         - Key: Name
           Value: PublicInstanceSG
