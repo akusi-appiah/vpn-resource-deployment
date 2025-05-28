@@ -112,7 +112,7 @@ Resources:
       SubnetId: !Ref PrivateSubnet
       RouteTableId: !Ref PrivateRouteTable
 
-  InstanceSecurityGroup:
+  PublicInstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow HTTP only
@@ -122,7 +122,25 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: !Ref PrivateSubnetCidr
+      Tags:
+        - Key: Name
+          Value: PublicInstanceSG
 
+  PrivateInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP only
+      VpcId: !Ref VPC
+      SecurityGroupIngress: []
+      Tags:
+        - Key: Name
+          Value: PrivateInstanceSG
+
+  
   SSMRole:
     Type: AWS::IAM::Role
     Properties:
