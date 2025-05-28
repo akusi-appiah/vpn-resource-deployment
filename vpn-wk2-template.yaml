@@ -112,32 +112,16 @@ Resources:
       SubnetId: !Ref PrivateSubnet
       RouteTableId: !Ref PrivateRouteTable
 
-  ##### split the security groups to allow for pinging#####
-  PublicInstanceSecurityGroup:
+  InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Security group for public EC2
+      GroupDescription: Allow HTTP only
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-        - IpProtocol: icmp
-          FromPort: -1
-          ToPort: -1
-          SourceSecurityGroupId: !Ref PrivateInstanceSecurityGroup
-
-  PrivateInstanceSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security group for private EC2
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: icmp
-          FromPort: -1
-          ToPort: -1
-          SourceSecurityGroupId: !Ref PublicInstanceSecurityGroup
 
   SSMRole:
     Type: AWS::IAM::Role
@@ -165,7 +149,7 @@ Resources:
       SubnetId: !Ref PublicSubnet
       ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}"
       SecurityGroupIds:
-        - !Ref PublicInstanceSecurityGroup
+        - !Ref InstanceSecurityGroup
       IamInstanceProfile: !Ref SSMInstanceProfile
       UserData:
         Fn::Base64: !Sub |
@@ -186,11 +170,12 @@ Resources:
       SubnetId: !Ref PrivateSubnet
       ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}"
       SecurityGroupIds:
-        - !Ref PrivateInstanceSecurityGroup
+        - !Ref InstanceSecurityGroup
       IamInstanceProfile: !Ref SSMInstanceProfile
       Tags:
         - Key: Name
           Value: PrivateInstance
+
 Outputs:
   WebServerPublicIP:
     Description: Public IP of the Apache Web Server
