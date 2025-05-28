@@ -135,7 +135,6 @@ Resources:
     Properties:
       GroupDescription: Allow HTTP only
       VpcId: !Ref VPC
-      SecurityGroupIngress: []
       Tags:
         - Key: Name
           Value: PrivateInstanceSG
